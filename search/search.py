@@ -75,7 +75,7 @@ def tinyMazeSearch(problem):
 def depthFirstSearch(problem):
     from game import Directions
     directions = {'North': Directions.NORTH, 'East': Directions.EAST,
-                        'South': Directions.SOUTH, 'West': Directions.WEST}
+                    'South': Directions.SOUTH, 'West': Directions.WEST}
 
     stack = util.Stack()
     stack.push(([], problem.getStartState()))
@@ -93,10 +93,9 @@ def depthFirstSearch(problem):
                     stack.push((path + [directions[nextPath]], nextVertex))
 
 def breadthFirstSearch(problem):
-    """Search the shallowest nodes in the search tree first."""
     from game import Directions
     directions = {'North': Directions.NORTH, 'East': Directions.EAST,
-                        'South': Directions.SOUTH, 'West': Directions.WEST}
+                    'South': Directions.SOUTH, 'West': Directions.WEST}
 
     queue = util.Queue()
     queue.push(([], problem.getStartState()))
@@ -113,11 +112,27 @@ def breadthFirstSearch(problem):
                 if nextVertex not in visited:
                     queue.push((path + [directions[nextPath]], nextVertex))
 
-
 def uniformCostSearch(problem):
-    """Search the node of least total cost first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    from game import Directions
+    directions = {'North': Directions.NORTH, 'East': Directions.EAST,
+                    'South': Directions.SOUTH, 'West': Directions.WEST}
+
+    pQueue = util.PriorityQueue()
+    pQueue.push(([], problem.getStartState()), 0)
+    visited = set()
+
+    while pQueue:
+        path,vertex = pQueue.pop()
+        if problem.isGoalState(vertex):
+            return path
+        if vertex not in visited:
+            visited.add(vertex)
+            for nextNode in problem.getSuccessors(vertex):
+                (nextVertex,nextPath,cost) = nextNode
+                if nextVertex not in visited:
+                    # get the next priority level
+                    priority = problem.getCostOfActions(path + [directions[nextPath]])
+                    pQueue.push((path + [directions[nextPath]], nextVertex), priority)
 
 def nullHeuristic(state, problem=None):
     """
