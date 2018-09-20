@@ -154,7 +154,7 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     startNode = ([], problem.getStartState(), currentCost)
     pQueue.push(startNode, calculatedCost)
 
-    while pQueue:
+    while not pQueue.isEmpty():
         node = pQueue.pop()
         (path,vertex,cost) = node
 
@@ -172,31 +172,31 @@ def aStarSearch(problem, heuristic=nullHeuristic):
                     pQueue.push(newNode, heur)
 
 
-# def createActionListFromVisited(visited):
-#     actions = []
-#     startState = visited[0][0]
-#     print "Visited before:", visited
-#     visited.reverse()
-#     print "Visited after:", visited
-#
-#     for state in visited:
-#         action = None
-#         vertex,direction = state
-#         if vertex == startState:
-#             print "BREAK"
-#             break
-#         from game import Directions
-#         if 'South' in direction:
-#             action = Directions.SOUTH
-#         elif 'North' in direction:
-#             action = Directions.NORTH
-#         elif 'West' in direction:
-#             action = Directions.WEST
-#         elif 'East' in direction:
-#             action = Directions.EAST
-#         if action is not None:
-#             actions.append(action)
-#     return actions
+def createActionListFromVisited(visited):
+    actions = []
+    startState = visited[0][0]
+    print "Visited before:", visited
+    visited.reverse()
+    print "Visited after:", visited
+
+    for state in visited:
+        action = None
+        vertex,direction = state
+        if vertex == startState:
+            print "BREAK"
+            break
+        from game import Directions
+        if 'South' in direction:
+            action = Directions.SOUTH
+        elif 'North' in direction:
+            action = Directions.NORTH
+        elif 'West' in direction:
+            action = Directions.WEST
+        elif 'East' in direction:
+            action = Directions.EAST
+        if action is not None:
+            actions.append(action)
+    return actions
 
 # Abbreviations
 bfs = breadthFirstSearch
