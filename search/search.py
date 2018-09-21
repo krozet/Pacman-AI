@@ -73,75 +73,70 @@ def tinyMazeSearch(problem):
     return  [s, s, w, s, w, w, s, w]
 
 def depthFirstSearch(problem):
-    from game import Directions
-    directions = {'North': Directions.NORTH, 'East': Directions.EAST,
-                    'South': Directions.SOUTH, 'West': Directions.WEST}
+    frontier = util.Stack()
+    visited = []
+    frontier.push((problem.getStartState(), None, []))
 
-    stack = util.Stack()
-    stack.push(([], problem.getStartState()))
-    visited = set()
+    while not frontier.isEmpty():
+        node = frontier.pop()
+        (position,direction,path) = node
 
-    while stack:
-        path,vertex = stack.pop()
-        if problem.isGoalState(vertex):
-            return path
-        if vertex not in visited:
+        if position not in visited:
             # add visited location to visited set
-            visited.add(vertex)
+            visited.append(position)
+            if(problem.isGoalState(position)):
+                return path
             # checks through each state in successor states
-            for nextNode in problem.getSuccessors(vertex):
-                (nextVertex,nextPath,cost) = nextNode
-                if nextVertex not in visited:
+            for nextNode in problem.getSuccessors(position):
+                (nextPosition,nextDirection,cost) = nextNode
+                if nextPosition not in visited:
                     # saves the node and the path taken
-                    stack.push((path + [directions[nextPath]], nextVertex))
+                    frontier.push((nextPosition, nextDirection, path + [nextDirection]))
 
 def breadthFirstSearch(problem):
-    from game import Directions
-    directions = {'North': Directions.NORTH, 'East': Directions.EAST,
-                    'South': Directions.SOUTH, 'West': Directions.WEST}
+    frontier = util.Queue()
+    visited = []
+    frontier.push((problem.getStartState(), None, []))
 
-    queue = util.Queue()
-    queue.push(([], problem.getStartState()))
-    visited = set()
+    while not frontier.isEmpty():
+        node = frontier.pop()
+        (position,direction,path) = node
 
-    while queue:
-        path,vertex = queue.pop()
-        if problem.isGoalState(vertex):
-            return path
-        if vertex not in visited:
+        if position not in visited:
             # add visited location to visited set
-            visited.add(vertex)
+            visited.append(position)
+            if(problem.isGoalState(position)):
+                return path
             # checks through each state in successor states
-            for nextNode in problem.getSuccessors(vertex):
-                (nextVertex,nextPath,cost) = nextNode
-                if nextVertex not in visited:
+            for nextNode in problem.getSuccessors(position):
+                (nextPosition,nextDirection,cost) = nextNode
+                if nextPosition not in visited:
                     # saves the node and the path taken
-                    queue.push((path + [directions[nextPath]], nextVertex))
+                    frontier.push((nextPosition, nextDirection, path + [nextDirection]))
 
 def uniformCostSearch(problem):
-    from game import Directions
-    directions = {'North': Directions.NORTH, 'East': Directions.EAST,
-                    'South': Directions.SOUTH, 'West': Directions.WEST}
-
-    pQueue = util.PriorityQueue()
-    pQueue.push(([], problem.getStartState()), 0)
+    frontier = util.PriorityQueue()
+    firstNode = ((problem.getStartState(), None, 0), [], 0)
+    frontier.push(firstNode, None)
     visited = set()
 
-    while pQueue:
-        path,vertex = pQueue.pop()
-        if problem.isGoalState(vertex):
+    while not frontier.isEmpty():
+        node = frontier.pop()
+        (location,path,cost) = node
+        (position,direction,currCost) = location
+        if problem.isGoalState(position):
             return path
-        if vertex not in visited:
+        if position not in visited:
             # add visited location to visited set
-            visited.add(vertex)
+            visited.add(position)
             # checks through each state in successor states
-            for nextNode in problem.getSuccessors(vertex):
-                (nextVertex,nextPath,cost) = nextNode
-                if nextVertex not in visited:
+            for nextNode in problem.getSuccessors(position):
+                (nextPosition,nextPath,nextCost) = nextNode
+                if nextPosition not in visited:
                     # get the next priority level
-                    priority = problem.getCostOfActions(path + [directions[nextPath]])
+                    newNode = (nextNode, path + [nextPath], cost + nextCost)
                     # saves the node and the path taken
-                    pQueue.push((path + [directions[nextPath]], nextVertex), priority)
+                    frontier.push(newNode, cost + nextCost)
 
 def nullHeuristic(state, problem=None):
     """
@@ -152,39 +147,29 @@ def nullHeuristic(state, problem=None):
 
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
-    from game import Directions
-    directions = {'North': Directions.NORTH, 'East': Directions.EAST,
-                    'South': Directions.SOUTH, 'West': Directions.WEST}
-    pQueue = util.PriorityQueue()
-    visited = set()
+    frontier = util.PriorityQueue()
+
+    visited = []
     heur = heuristic(problem.getStartState(), problem)
     currentCost = 0
-    calculatedCost = heur + currentCost
-    startNode = ([], problem.getStartState(), currentCost)
-    pQueue.push(startNode, calculatedCost)
+    totalCost = currentCost + heur
+    frontier.push((problem.getStartState(), None, currentCost, []), totalCost)
 
-    while not pQueue.isEmpty():
-        node = pQueue.pop()
-        (path,vertex,cost) = node
-
-        if vertex not in visited:
-            # add visited location to visited set
-            visited.add(vertex)
-            # checks through each state in successor states
-            for nextNode in problem.getSuccessors(vertex):
-                (nextVertex,nextPath,nextCost) = nextNode
-                if nextVertex not in visited:
-                    if problem.isGoalState(nextVertex):
-                        return path + [nextPath]
-                    # calculate the heuristic
-                    heur = heuristic(nextVertex, problem)
+    while not frontier.isEmpty():
+        node = frontier.pop()
+        (position,direction,cost,path) = node
+        if problem.isGoalState(position):
+            return path
+        if position not in visited:
+            visited.append(position)
+            for nextNode in problem.getSuccessors(position):
+                (nextPosition,nextPath,nextCost) = nextNode
+                if nextPosition not in visited:
+                    heur = heuristic(nextPosition, problem)
                     currentCost = cost + nextCost
-                    # calculatedCost found by adding heuristic value and currentCost
-                    calculatedCost = heur + currentCost
-                    newNode = (path + [nextPath], nextVertex, currentCost)
-                    # saves the node and the path taken
-                    pQueue.push(newNode, heur)
-
+                    totalCost = currentCost + heur
+                    newNode = (nextPosition, nextPath, currentCost, path + [nextPath])
+                    frontier.push(newNode, totalCost)
 
 def createActionListFromVisited(visited):
     actions = []
