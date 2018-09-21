@@ -86,10 +86,13 @@ def depthFirstSearch(problem):
         if problem.isGoalState(vertex):
             return path
         if vertex not in visited:
+            # add visited location to visited set
             visited.add(vertex)
+            # checks through each state in successor states
             for nextNode in problem.getSuccessors(vertex):
                 (nextVertex,nextPath,cost) = nextNode
                 if nextVertex not in visited:
+                    # saves the node and the path taken
                     stack.push((path + [directions[nextPath]], nextVertex))
 
 def breadthFirstSearch(problem):
@@ -106,10 +109,13 @@ def breadthFirstSearch(problem):
         if problem.isGoalState(vertex):
             return path
         if vertex not in visited:
+            # add visited location to visited set
             visited.add(vertex)
+            # checks through each state in successor states
             for nextNode in problem.getSuccessors(vertex):
                 (nextVertex,nextPath,cost) = nextNode
                 if nextVertex not in visited:
+                    # saves the node and the path taken
                     queue.push((path + [directions[nextPath]], nextVertex))
 
 def uniformCostSearch(problem):
@@ -126,12 +132,15 @@ def uniformCostSearch(problem):
         if problem.isGoalState(vertex):
             return path
         if vertex not in visited:
+            # add visited location to visited set
             visited.add(vertex)
+            # checks through each state in successor states
             for nextNode in problem.getSuccessors(vertex):
                 (nextVertex,nextPath,cost) = nextNode
                 if nextVertex not in visited:
                     # get the next priority level
                     priority = problem.getCostOfActions(path + [directions[nextPath]])
+                    # saves the node and the path taken
                     pQueue.push((path + [directions[nextPath]], nextVertex), priority)
 
 def nullHeuristic(state, problem=None):
@@ -159,16 +168,21 @@ def aStarSearch(problem, heuristic=nullHeuristic):
         (path,vertex,cost) = node
 
         if vertex not in visited:
+            # add visited location to visited set
             visited.add(vertex)
+            # checks through each state in successor states
             for nextNode in problem.getSuccessors(vertex):
                 (nextVertex,nextPath,nextCost) = nextNode
                 if nextVertex not in visited:
                     if problem.isGoalState(nextVertex):
                         return path + [nextPath]
+                    # calculate the heuristic
                     heur = heuristic(nextVertex, problem)
                     currentCost = cost + nextCost
+                    # calculatedCost found by adding heuristic value and currentCost
                     calculatedCost = heur + currentCost
                     newNode = (path + [nextPath], nextVertex, currentCost)
+                    # saves the node and the path taken
                     pQueue.push(newNode, heur)
 
 

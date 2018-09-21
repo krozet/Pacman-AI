@@ -455,6 +455,7 @@ def foodHeuristic(state, problem):
     foodGridList = foodGrid.asList()
     maxDistance = -sys.maxint
 
+    # finds the maxDistance to the food
     for foodPosition in foodGridList:
         manhattanDistance = abs(position[0] - foodPosition[0]) + abs(position[1] - foodPosition[1])
         if manhattanDistance > maxDistance:
@@ -489,6 +490,7 @@ class ClosestDotSearchAgent(SearchAgent):
         walls = gameState.getWalls()
         problem = AnyFoodSearchProblem(gameState)
 
+        # calls breadthFirstSearch on problem
         return search.breadthFirstSearch(problem)
 
 class AnyFoodSearchProblem(PositionSearchProblem):
