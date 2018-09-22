@@ -81,11 +81,11 @@ def depthFirstSearch(problem):
         node = frontier.pop()
         (position,direction,path) = node
 
+        if(problem.isGoalState(position)):
+            return path
         if position not in visited:
             # add visited location to visited set
             visited.append(position)
-            if(problem.isGoalState(position)):
-                return path
             # checks through each state in successor states
             for nextNode in problem.getSuccessors(position):
                 (nextPosition,nextDirection,cost) = nextNode
@@ -102,11 +102,11 @@ def breadthFirstSearch(problem):
         node = frontier.pop()
         (position,direction,path) = node
 
+        if(problem.isGoalState(position)):
+            return path
         if position not in visited:
             # add visited location to visited set
             visited.append(position)
-            if(problem.isGoalState(position)):
-                return path
             # checks through each state in successor states
             for nextNode in problem.getSuccessors(position):
                 (nextPosition,nextDirection,cost) = nextNode

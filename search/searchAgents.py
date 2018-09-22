@@ -287,13 +287,28 @@ class CornersProblem(search.SearchProblem):
         self._expanded = 0 # DO NOT CHANGE; Number of search nodes expanded
         # Please add any code here which you would like to use
         # in initializing the problem
+        self.startingGameState = startingGameState
 
     def getStartState(self):
         corners = (False,False,False,False)
+        # check if starting in a corner
+        position = self.startingPosition
+        cornersList = list(corners)
+        if position in self.corners:
+            for i in range(0,4):
+                if position == self.corners[i]:
+                    cornersList[i] = True
+        corners = tuple(cornersList)
         return (self.startingPosition, corners)
 
     def isGoalState(self, state):
         position,corners = state
+        cornersList = list(corners)
+        if position in self.corners:
+            for i in range(0,4):
+                if position == self.corners[i]:
+                    cornersList[i] = True
+        corners = tuple(cornersList)
         if corners[0] and corners[1] and corners[2] and corners[3]:
             return True
         return False
@@ -351,14 +366,15 @@ def cornersHeuristic(state, problem):
     import sys
     corners = problem.corners # These are the corner coordinates
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
+    gameState = problem.startingGameState
+    minDistance = sys.maxint
     position,currCorners = state
-    currDistance = sys.maxint
 
     for i in range(0,4):
         if currCorners[i] == False:
-            distance = min(currDistance,(abs(corners[i][0] - position[0]) +
-                                         abs(corners[i][1] - position[1])))
-    return distance
+            distanceToPoint = mazeDistance(position, corners[i], gameState)
+            minDistance = min(minDistance,distanceToPoint)
+    return minDistance
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"
@@ -453,14 +469,16 @@ def foodHeuristic(state, problem):
     import sys
     position, foodGrid = state
     foodGridList = foodGrid.asList()
-    maxDistance = -sys.maxint
+    maxDistance = 0
+    gameState = problem.startingGameState
 
     # finds the maxDistance to the food
     for foodPosition in foodGridList:
-        manhattanDistance = abs(position[0] - foodPosition[0]) + abs(position[1] - foodPosition[1])
-        if manhattanDistance > maxDistance:
-            maxDistance = manhattanDistance
+        distanceToPoint = mazeDistance(position, foodPosition, gameState)
+        if distanceToPoint > maxDistance:
+            maxDistance = distanceToPoint
     return maxDistance
+
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
