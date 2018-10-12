@@ -4,7 +4,7 @@
 # educational purposes provided that (1) you do not distribute or publish
 # solutions, (2) you retain this notice, and (3) you provide clear
 # attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
-# 
+#
 # Attribution Information: The Pacman AI projects were developed at UC Berkeley.
 # The core projects and autograders were primarily created by John DeNero
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
@@ -73,8 +73,26 @@ class ReflexAgent(Agent):
         newGhostStates = successorGameState.getGhostStates()
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
-        "*** YOUR CODE HERE ***"
-        return successorGameState.getScore()
+        if successorGameState.isWin():
+            return float("inf") - 20
+        # gets the manhattan dist between ghost position and new position
+        dist = util.manhattanDistance(currentGameState.getGhostPosition(1), newPos)
+        score = max(dist, 3) + successorGameState.getScore()
+        closestFood = 100
+        for food in newFood.asList():
+            # gets the manhattan dist between food position and new position
+            dist = util.manhattanDistance(food, newPos)
+            if (dist < closestFood):
+                closestFood = dist
+        # calculates the scores
+        if (currentGameState.getNumFood() > successorGameState.getNumFood()):
+            score += 100
+        if action == Directions.STOP:
+            score -= 3
+        score -= 3 * closestFood
+        if successorGameState.getPacmanPosition() in currentGameState.getCapsules():
+            score += 120
+        return score
 
 def scoreEvaluationFunction(currentGameState):
     """
@@ -128,8 +146,56 @@ class MinimaxAgent(MultiAgentSearchAgent):
           gameState.getNumAgents():
             Returns the total number of agents in the game
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        self.PACMAN = 0
+        action = self.max_value(gameState, 0)
+        return action
+
+    def max_value(self, gameState, depth):
+        if gameState.isLose() or gameState.isWin():
+            return gameState.getScore()
+        # get pacman's actions
+        actions = gameState.getLegalActions(self.PACMAN)
+        highestScore = float("-inf")
+
+        preferred = Directions.STOP
+        for action in actions:
+            # recursively get pacmans score
+            score = self.min_value(gameState.generateSuccessor(self.PACMAN, action), depth, 1)
+            if score > highestScore:
+                highestScore = score
+                preferred = action
+
+        if depth == 0:
+            return preferred
+        else:
+            return highestScore
+
+    def min_value(self, gameState, depth, agent):
+        if gameState.isLose() or gameState.isWin():
+            return gameState.getScore()
+
+        # get next agent
+        nextAgent = agent + 1
+        if agent == gameState.getNumAgents() - 1:
+            nextAgent = self.PACMAN
+
+        highestScore = float("inf")
+
+        for action in gameState.getLegalActions(agent):
+            # pacman is the last agent
+            if nextAgent == self.PACMAN:
+                if depth == self.depth - 1:
+                    # set scores at the leaf nodes
+                    score = self.evaluationFunction(gameState.generateSuccessor(agent, action))
+                else:
+                    # next is pacman
+                    score = self.max_value(gameState.generateSuccessor(agent, action), depth+1)
+            # all the ghosts except pacman
+            else:
+                score = self.min_value(gameState.generateSuccessor(agent, action), depth, nextAgent)
+
+            highestScore = min(score, highestScore)
+        return highestScore
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
@@ -170,4 +236,3 @@ def betterEvaluationFunction(currentGameState):
 
 # Abbreviation
 better = betterEvaluationFunction
-
