@@ -206,8 +206,65 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         """
           Returns the minimax action using self.depth and self.evaluationFunction
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        self.PACMAN = 0
+        action = self.max_value(gameState, 0, float("-inf"), float("inf"))
+        return action
+
+    def max_value(self, gameState, depth, alpha, beta):
+        if gameState.isLose() or gameState.isWin():
+            return gameState.getScore()
+        # get pacman's actions
+        actions = gameState.getLegalActions(self.PACMAN)
+        highestScore = float("-inf")
+
+        preferred = Directions.STOP
+        for action in actions:
+            # recursively get pacmans score
+            score = self.min_value(gameState.generateSuccessor(self.PACMAN, action), depth, 1, alpha, beta)
+            if score > highestScore:
+                highestScore = score
+                preferred = action
+            # calculate new alpha
+            alpha = max(alpha, highestScore)
+            if highestScore > beta:
+                return highestScore
+
+        if depth == 0:
+            return preferred
+        else:
+            return highestScore
+
+    def min_value(self, gameState, depth, agent, alpha, beta):
+        if gameState.isLose() or gameState.isWin():
+            return gameState.getScore()
+
+        # get next agent
+        nextAgent = agent + 1
+        if agent == gameState.getNumAgents() - 1:
+            nextAgent = self.PACMAN
+
+        highestScore = float("inf")
+
+        for action in gameState.getLegalActions(agent):
+            # pacman is the last agent
+            if nextAgent == self.PACMAN:
+                if depth == self.depth - 1:
+                    # set scores at the leaf nodes
+                    score = self.evaluationFunction(gameState.generateSuccessor(agent, action))
+                else:
+                    # next is pacman
+                    score = self.max_value(gameState.generateSuccessor(agent, action), depth+1, alpha, beta)
+            # all the ghosts except pacman
+            else:
+                score = self.min_value(gameState.generateSuccessor(agent, action), depth, nextAgent, alpha, beta)
+
+            highestScore = min(score, highestScore)
+            # calculate new beta
+            beta = min(beta, highestScore)
+
+            if highestScore < alpha:
+                return highestScore
+        return highestScore
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
